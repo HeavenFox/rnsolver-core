@@ -1,7 +1,13 @@
 package org.heavenfox.rnsolver;
 
-import java.io.*;
-import org.heavenfox.rnsolver.electrics.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.ServerSocket;
+import java.net.Socket;
+
+import org.heavenfox.rnsolver.electrics.ResistanceNetwork;
 
 public class RNSolver {
 
@@ -11,20 +17,41 @@ public class RNSolver {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-		System.out.println("欢迎使用网络电阻等效电阻求解软件!");
-		System.out.println("制作:东北师大附中初中部 初二十二班 祝靖斯");
-		System.out.println("本作品是2008年科技创新大赛的参赛项目");
-		System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-		System.out.println("请按照说明输入网络电阻的结构");
-		ResistanceNetwork rn = read(reader);
-		System.out.println("等效电阻R = "+rn.solve().toString()+" Ω");
-		System.out.println("按任意键继续...");
-		// Pause
+		System.out.println("Welcome to RNSolver. Starting service...");
+		Socket incoming = null;
+		
+		ServerSocket server = null;
+		
+		BufferedReader in = null;
+		PrintWriter out = null;
+		ResistanceNetwork rn = null;
 		try {
-			System.in.read();
+			server = new ServerSocket(5428);
+			
+			incoming = server.accept();
+			
+			in = new BufferedReader(new InputStreamReader(incoming.getInputStream()));
+			out = new PrintWriter(incoming.getOutputStream(),true);
+			
+			System.out.println("Service started.");
+			
+			rn = read(in);
+		} catch (Exception e) {
+			// Unknown Host
+			System.out.println("Sorry, unexpected condition occurs");
+		}
+		
+		try {
+			out.println(rn.solve().toString());
+			
+			System.out.println("Done!");
+			
+			incoming.close();
+			server.close();
+			out.close();
+			in.close();
 		} catch(Exception e) {
-			System.out.println("发生错误");
+			System.out.println("Error occurs");
 		}
 	}
 	
@@ -61,9 +88,9 @@ public class RNSolver {
 				rn.addResistance(a, b, r);
 			}
 		} catch (IOException e) {
-			System.out.println("出现错误!");
+			System.out.println("Error occurs!");
 		} catch (Exception e) {
-			System.out.println("请输入合法的整数");
+			System.out.println("Communication error.");
 		}
 		
 		return rn;
