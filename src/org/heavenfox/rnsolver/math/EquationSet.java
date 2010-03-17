@@ -82,7 +82,7 @@ public class EquationSet {
 			}
 			B.M[i][0] = new Fraction(this.equations[i].getConstant());
 		}
-		B.print();
+		//B.print();
 		// Gauss
 		// First, reduce
 		for ( int i=0;i<currentUnknown;i++ ) {
